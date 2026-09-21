@@ -277,6 +277,31 @@ freewalk(pagetable_t pagetable)
   kfree((void*)pagetable);
 }
 
+pagetable_t
+get_kernel_pagetable(void)
+{
+  return kernel_pagetable;
+}
+
+
+uint64
+walk_used(pagetable_t pagetable)
+{
+  uint64 num_used = 0;
+  // there are 2^9 = 512 PTEs in a page table.
+  for(int i = 0; i < 512; i++){
+    pte_t pte = pagetable[i];
+    if((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0){
+      // this PTE points to a lower-level page table.
+      uint64 child = PTE2PA(pte);
+      num_used += walk_used((pagetable_t)child);
+    } else if(pte & PTE_V){
+        num_used += 1;
+    }
+  }
+  return num_used;
+}
+
 // Free user memory pages,
 // then free page-table pages.
 void

@@ -146,3 +146,48 @@ sys_waitx(void)
 
   return kwaitx(addr, rtime_addr, stime_addr);
 }
+
+uint64
+sys_getusedmem(void)
+{
+  pagetable_t kpt = get_kernel_pagetable();
+  return walk_used(kpt);
+}
+
+uint64
+sys_mprotect(void)
+{
+  uint64 addr;
+  argaddr(0, &addr);
+
+  struct proc *p = myproc();
+
+  pte_t *pte = walk(p->pagetable, addr ,0);
+  if (pte == 0){
+    printf("Not valid page address\n");
+    return 0;
+  }
+  *pte &= ~PTE_W;
+  sfence_vma();
+
+  return 0;
+}
+
+uint64
+sys_munprotect(void)
+{
+  uint64 addr;
+  argaddr(0, &addr);
+
+  struct proc *p = myproc();
+
+  pte_t *pte = walk(p->pagetable, addr ,0);
+  if (pte == 0){
+    printf("Not valid page address\n");
+    return 0;
+  }
+  *pte |= PTE_W;
+  sfence_vma();
+
+  return 0;
+}
