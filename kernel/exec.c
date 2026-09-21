@@ -55,6 +55,13 @@ kexec(char *path, char **argv)
   if((pagetable = proc_pagetable(p)) == 0)
     goto bad;
 
+  if(uvmalloc(pagetable, 0, PGSIZE, PTE_W) == 0)
+    goto bad;
+
+  uvmclear(pagetable, 0);
+
+  sz = PGSIZE;
+
   // Load program into memory.
   for(i=0, off=elf.phoff; i<elf.phnum; i++, off+=sizeof(ph)){
     if(readi(ip, 0, (uint64)&ph, off, sizeof(ph)) != sizeof(ph))
@@ -90,6 +97,7 @@ kexec(char *path, char **argv)
     goto bad;
   sz = sz1;
   uvmclear(pagetable, sz-(USERSTACK+1)*PGSIZE);
+  uvmclear(pagetable, 0);
   sp = sz;
   stackbase = sp - USERSTACK*PGSIZE;
 
@@ -207,6 +215,13 @@ kexecp(char *path, int priority, char **argv)
 
   if((pagetable = proc_pagetable(p)) == 0)
     goto bad;
+
+  if(uvmalloc(pagetable, 0, PGSIZE, PTE_W) == 0)
+    goto bad;
+
+  uvmclear(pagetable, 0);
+
+  sz = PGSIZE;
 
   // Load program into memory.
   for(i=0, off=elf.phoff; i<elf.phnum; i++, off+=sizeof(ph)){
