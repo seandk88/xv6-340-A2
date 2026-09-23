@@ -4,7 +4,7 @@
 int
 main(int argc, char *argv[])
 {
-    char* address = sbrk(1000);
+    char* address = sbrk(10000);
     // write to make sure memory has been allocated and is writable
     *address = 0x12;
 
@@ -12,8 +12,8 @@ main(int argc, char *argv[])
     // void *ptr = (void*)0x40000000L;
     // mprotect(ptr);
 
-    // mprotect(address);
     // Try uncommenting this line, and see if the program crashes
+    mprotect(address);
     *address = 0x34;
     printf("%d\n", (int)(*address));
 

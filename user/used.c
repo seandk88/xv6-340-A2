@@ -1,4 +1,5 @@
 #include "kernel/types.h"
+#include "kernel/riscv.h"
 #include "kernel/stat.h"
 #include "user/user.h"
 
@@ -7,7 +8,7 @@ main(int argc, char *argv[])
 {
   uint64 used = getusedmem();
   // pages to bytes
-  used = used << 12;
+  used = used * PGSIZE;
 
   printf("Used memory: [%ld] bytes\n", used);
 
